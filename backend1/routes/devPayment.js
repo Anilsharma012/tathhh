@@ -48,6 +48,12 @@ router.post('/unlock-course-payment', async (req, res) => {
     );
     
     if (existingCourse) {
+      // If already present but locked, mark as unlocked
+      if (existingCourse.status !== 'unlocked') {
+        existingCourse.status = 'unlocked';
+        await demoUser.save();
+        console.log('✅ Existing demo enrollment status updated to unlocked for demo user:', demoUser._id);
+      }
       return res.status(200).json({
         success: true,
         message: 'Course already unlocked',
@@ -62,7 +68,7 @@ router.post('/unlock-course-payment', async (req, res) => {
       status: 'unlocked',
       enrolledAt: new Date()
     });
-    
+
     await demoUser.save();
     console.log('✅ Course unlocked for demo user:', courseId);
 
