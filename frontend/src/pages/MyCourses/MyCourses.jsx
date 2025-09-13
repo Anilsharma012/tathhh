@@ -13,19 +13,12 @@ const MyCourses = () => {
     const run = async () => {
       setLoading(true);
       try {
-        const res = await fetch('/api/user/student/my-courses', { credentials: 'include' });
-        if (res.status === 401 || res.status === 403) {
-          setLoading(false);
-          setError('Please login');
-          try { toast('Please login'); } catch (e) {}
-          return;
-        }
-
-        const data = await res.json();
+        // Use the centralized API helper which includes better error handling and retries
+        const data = await fetchMyCourses();
         console.log('my-courses:', data);
 
-        // Normalize response
-        const raw = data?.enrolledCourses || data?.unlockedCourses || data || [];
+        // Normalize response from various possible shapes
+        const raw = data?.enrolledCourses || data?.unlockedCourses || data?.courses || data?.data || data || [];
         const normalized = (Array.isArray(raw) ? raw : []).map(x => (x && x.courseId) ? x : ({ courseId: x, status: x?.status || 'unlocked' }));
 
         // Only unlocked
@@ -46,7 +39,9 @@ const MyCourses = () => {
             }
             localStorage.removeItem('justPurchasedCourseId');
           }
-        } catch (e) {}
+        } catch (e) {
+          // ignore localStorage errors
+        }
 
         setItems(unlocked);
       } catch (e) {
