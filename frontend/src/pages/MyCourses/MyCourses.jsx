@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import './MyCourses.css';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { fetchMyCourses } from '../../utils/api';
 
 const MyCourses = () => {
   const [items, setItems] = useState([]);
