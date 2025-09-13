@@ -78,13 +78,16 @@ const MyCourses = () => {
     <div className="mc-grid">
       {items.map((c) => {
         const course = c.courseId || c; // populated or id
-        const id = course?._id || c._id;
+        const id = course?._id || (course && course.toString && course.toString()) || c._id;
+        const title = (course && (course.name || course.title || course.courseTitle)) || c.title || 'Course';
+        const thumb = (course && (course.thumbnail || course.thumb || course.image)) || '';
+        const highlight = !!c._justPurchased;
         return (
-          <div className="mc-card" key={c._id || id}>
-            <div className="mc-thumb" />
-            <div className="mc-title">{course?.name || 'Course'}</div>
+          <div className={`mc-card ${highlight ? 'mc-highlight' : ''}`} key={c._id || id}>
+            <div className="mc-thumb" style={{ backgroundImage: thumb ? `url(${thumb})` : undefined }} />
+            <div className="mc-title">{title}</div>
             <div className="mc-status">unlocked</div>
-            <button className="mc-start" onClick={() => navigate(`/student/course/${id}`)}>Start Learning</button>
+            <button className="mc-start" onClick={() => navigate(`/course/${course?._id || course}`)}>Start Learning</button>
           </div>
         );
       })}
