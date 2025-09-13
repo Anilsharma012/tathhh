@@ -243,8 +243,8 @@ const loadMyCourses = async () => {
 
   try {
     // Try dev payment endpoint first
-    console.log('�� Trying dev endpoint: /api/dev-payment/my-courses');
-    let response = await fetch('/api/dev-payment/my-courses');
+    console.log('🔄 Trying dev endpoint: /api/dev-payment/my-courses with auth');
+    let response = await fetch('/api/dev-payment/my-courses', { headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' } });
     console.log('📊 Dev endpoint response status:', response.status);
 
     // If that fails, try regular endpoint
