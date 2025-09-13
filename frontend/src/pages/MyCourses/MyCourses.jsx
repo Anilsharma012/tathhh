@@ -52,7 +52,9 @@ const MyCourses = () => {
         setItems(unlocked);
       } catch (e) {
         console.error('my-courses fetch error', e);
-        setError(e.message && e.message.includes('Network') ? 'Network error' : 'Failed to load');
+        const msg = e.message && e.message.includes('Network') ? 'Network error' : 'Failed to load';
+        setError(msg);
+        try { if (msg === 'Network error') toast('Network error'); } catch (e2) {}
       } finally {
         setLoading(false);
       }
