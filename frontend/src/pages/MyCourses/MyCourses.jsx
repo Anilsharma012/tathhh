@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from 'react';
 import React, { useState, useEffect } from 'react';
 import './MyCourses.css';
 import { useNavigate } from 'react-router-dom';
