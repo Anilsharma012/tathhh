@@ -18,8 +18,7 @@ const MyCourses = () => {
         if (res.status === 401 || res.status === 403) {
           setLoading(false);
           setError('Please login');
-          // show toast if react-toastify available
-          try { const { toast } = await import('react-toastify'); toast.toast ? toast.toast('Please login') : toast.toast; } catch(e){}
+          try { toast('Please login'); } catch (e) {}
           return;
         }
 
