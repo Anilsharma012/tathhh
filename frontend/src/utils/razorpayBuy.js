@@ -61,6 +61,14 @@ window.buyCourse = async function(params) {
           const v = await verifyPayment({ ...resp, courseId: params.courseId, userId: params.userId });
           if (v && v.success) {
             toast.success('Payment successful');
+            try {
+              // Try to hit dev unlock endpoint to ensure demo user enrolled (idempotent)
+              fetch('/api/dev-payment/unlock-course-payment', {
+                method: 'POST',
+                headers: headers(),
+                body: JSON.stringify({ courseId: params.courseId })
+              }).catch(() => {});
+            } catch (e) {}
             // Redirect student to dashboard and show My Courses section
             window.location = '/student/dashboard?showMyCourses=1';
           } else {
