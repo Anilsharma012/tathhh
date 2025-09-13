@@ -363,21 +363,29 @@ const loadMyCourses = async () => {
 
   // Handle payment success redirect
   useEffect(() => {
-    if (location.state?.showMyCourses) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const showFromQuery = urlParams.get('showMyCourses') === '1' || urlParams.get('showMyCourses') === 'true';
+
+    if (location.state?.showMyCourses || showFromQuery) {
       setActiveSection('my-courses'); // Navigate to My Courses section
 
       // Immediate refresh to show purchased course
       loadMyCourses();
 
-      if (location.state?.refreshCourses) {
+      if (location.state?.refreshCourses || showFromQuery) {
         // Additional refresh after a delay to ensure data is updated
         setTimeout(() => {
           loadMyCourses();
           loadCourses(); // Also refresh available courses
         }, 1000);
       }
-      // Clear the state to prevent repeated refreshes
-      window.history.replaceState({}, document.title);
+
+      // Clear the state and query param to prevent repeated refreshes
+      try {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } catch (e) {
+        // ignore
+      }
     }
   }, [location.state]);
 
