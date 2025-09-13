@@ -61,7 +61,8 @@ window.buyCourse = async function(params) {
           const v = await verifyPayment({ ...resp, courseId: params.courseId, userId: params.userId });
           if (v && v.success) {
             toast.success('Payment successful');
-            window.location = '/my-courses';
+            // Redirect student to dashboard and show My Courses section
+            window.location = '/student/dashboard?showMyCourses=1';
           } else {
             toast.error('Payment verification failed');
           }
