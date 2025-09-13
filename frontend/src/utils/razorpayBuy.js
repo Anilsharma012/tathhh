@@ -69,8 +69,10 @@ window.buyCourse = async function(params) {
                 body: JSON.stringify({ courseId: params.courseId })
               }).catch(() => {});
             } catch (e) {}
-            // Redirect student to dashboard and show My Courses section
-            window.location = '/student/dashboard?showMyCourses=1';
+
+            // Mark just purchased course id and redirect to My Courses
+            try { localStorage.setItem('justPurchasedCourseId', params.courseId); } catch(e) {}
+            window.location = '/my-courses';
           } else {
             toast.error('Payment verification failed');
           }
