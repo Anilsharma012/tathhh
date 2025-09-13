@@ -175,8 +175,15 @@ const Login = ({ onClose, setUser }) => {
       setTimeout(() => setToastMessage(""), 3000);
     } catch (err) {
       console.error("Error sending SMS OTP", err);
-      setOtpError("Failed to send OTP. Try again.");
-      setTimeout(() => setOtpError(""), 3000);
+      const status = err?.response?.status;
+      if (status === 404) {
+        setOtpError('Server endpoint not found (404). Ensure the backend API is reachable and API base is configured.');
+      } else if (err?.message && err.message.includes('Network')) {
+        setOtpError('Network error while sending OTP. Check your connection or backend availability.');
+      } else {
+        setOtpError("Failed to send OTP. Try again.");
+      }
+      setTimeout(() => setOtpError(""), 4000);
     }
   };
 
