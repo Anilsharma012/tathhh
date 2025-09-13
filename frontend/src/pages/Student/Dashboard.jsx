@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './Dashboard.css';
 import './Dashboard-purchases.css';
-import { fetchPublishedCourses } from '../../utils/api';
+import { fetchPublishedCourses, fetchMyCourses } from '../../utils/api';
 import DiscussionForum from '../../components/DiscussionForum/DiscussionForum';
 import MockTestPage from './MockTests/MockTestPage';
 import { fetchLiveClasses } from '../../utils/liveClassesApi';
@@ -242,37 +242,9 @@ const loadMyCourses = async () => {
   console.log('🔄 loadMyCourses: Starting to fetch courses...');
 
   try {
-    // Try dev payment endpoint first
-    console.log('�� Trying dev endpoint: /api/dev-payment/my-courses');
-    let response = await fetch('/api/dev-payment/my-courses');
-    console.log('📊 Dev endpoint response status:', response.status);
-
-    // If that fails, try regular endpoint
-    if (!response.ok) {
-      console.log('🔄 Dev endpoint failed, trying regular endpoint: /api/user/student/my-courses');
-      response = await fetch('/api/user/student/my-courses', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      console.log('📊 Regular endpoint response status:', response.status);
-    }
-
-    if (!response.ok) {
-      console.warn(`⚠️ API responded with status ${response.status}`);
-      console.warn('⚠️ API call failed - not showing demo courses to avoid conflicts');
-      setMyCourses([]);
-      return;
-    }
-
-    const data = await response.json();
-    console.log("📦 My Courses Response:", data);
-    console.log("🔍 Response structure analysis:");
-    console.log("   - data.courses:", data.courses);
-    console.log("   - Array.isArray(data.courses):", Array.isArray(data.courses));
-    console.log("   - data.courses length:", data.courses ? data.courses.length : 'N/A');
+    // Use centralized API helper which handles auth headers and network errors
+    const data = await fetchMyCourses();
+    console.log('📦 My Courses Response:', data);
 
     // Handle different response formats
     let coursesArray = [];
@@ -281,10 +253,16 @@ const loadMyCourses = async () => {
       console.log('✅ Using data.courses array');
     } else if (Array.isArray(data)) {
       coursesArray = data;
-      console.log('��� Using data as array');
+      console.log('✅ Using data as array');
     } else if (data.data && Array.isArray(data.data)) {
       coursesArray = data.data;
       console.log('✅ Using data.data array');
+    } else if (Array.isArray(data.enrolledCourses)) {
+      coursesArray = data.enrolledCourses;
+      console.log('✅ Using data.enrolledCourses');
+    } else if (Array.isArray(data.unlockedCourses)) {
+      coursesArray = data.unlockedCourses;
+      console.log('✅ Using data.unlockedCourses');
     } else {
       console.warn('⚠️ No courses array found in response:', data);
     }
@@ -363,21 +341,29 @@ const loadMyCourses = async () => {
 
   // Handle payment success redirect
   useEffect(() => {
-    if (location.state?.showMyCourses) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const showFromQuery = urlParams.get('showMyCourses') === '1' || urlParams.get('showMyCourses') === 'true';
+
+    if (location.state?.showMyCourses || showFromQuery) {
       setActiveSection('my-courses'); // Navigate to My Courses section
 
       // Immediate refresh to show purchased course
       loadMyCourses();
 
-      if (location.state?.refreshCourses) {
+      if (location.state?.refreshCourses || showFromQuery) {
         // Additional refresh after a delay to ensure data is updated
         setTimeout(() => {
           loadMyCourses();
           loadCourses(); // Also refresh available courses
         }, 1000);
       }
-      // Clear the state to prevent repeated refreshes
-      window.history.replaceState({}, document.title);
+
+      // Clear the state and query param to prevent repeated refreshes
+      try {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } catch (e) {
+        // ignore
+      }
     }
   }, [location.state]);
 

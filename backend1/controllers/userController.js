@@ -918,7 +918,14 @@ exports.verifyAndUnlockPayment = async (req, res) => {
         console.log('✅ Course unlocked for user:', user._id);
         console.log('📚 Updated enrolled courses:', user.enrolledCourses);
       } else {
-        console.log('ℹ️ Course already unlocked for user');
+        // If an enrollment exists but is not unlocked, update it to unlocked
+        if (existingCourse.status !== 'unlocked') {
+          existingCourse.status = 'unlocked';
+          await user.save();
+          console.log('✅ Existing enrollment status updated to unlocked for user:', user._id);
+        } else {
+          console.log('ℹ️ Course already unlocked for user');
+        }
       }
 
       return res.status(200).json({

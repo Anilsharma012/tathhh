@@ -109,13 +109,20 @@ const Login = ({ onClose, setUser }) => {
       });
       setStep("verify_email");
 
-      // ✅ Show success toast
+      // ��� Show success toast
       setToastMessage("📩 OTP sent successfully!");
       setTimeout(() => setToastMessage(""), 3000);
     } catch (err) {
       console.error("Error sending email OTP", err);
-      setOtpError("Failed to send OTP. Try again.");
-      setTimeout(() => setOtpError(""), 3000);
+      const status = err?.response?.status;
+      if (status === 404) {
+        setOtpError('Server endpoint not found (404). Ensure the backend API is reachable and API base is configured.');
+      } else if (err?.message && err.message.includes('Network')) {
+        setOtpError('Network error while sending OTP. Check your connection or backend availability.');
+      } else {
+        setOtpError("Failed to send OTP. Try again.");
+      }
+      setTimeout(() => setOtpError(""), 4000);
     }
   };
 
@@ -143,8 +150,16 @@ const Login = ({ onClose, setUser }) => {
         handlePostLoginRedirect(response.data.redirectTo);
       }, 2000);
     } catch (err) {
-      setOtpError("❌ Invalid OTP. Please try again.");
-      setTimeout(() => setOtpError(""), 3000);
+      console.error('verifyOtpEmail error', err);
+      const status = err?.response?.status;
+      if (status === 404) {
+        setOtpError('Server endpoint not found (404). Ensure the backend API is reachable and API base is configured.');
+      } else if (err?.message && err.message.includes('Network')) {
+        setOtpError('Network error while verifying OTP. Check your connection or backend availability.');
+      } else {
+        setOtpError("❌ Invalid OTP. Please try again.");
+      }
+      setTimeout(() => setOtpError(""), 4000);
     }
   };
 
@@ -160,8 +175,15 @@ const Login = ({ onClose, setUser }) => {
       setTimeout(() => setToastMessage(""), 3000);
     } catch (err) {
       console.error("Error sending SMS OTP", err);
-      setOtpError("Failed to send OTP. Try again.");
-      setTimeout(() => setOtpError(""), 3000);
+      const status = err?.response?.status;
+      if (status === 404) {
+        setOtpError('Server endpoint not found (404). Ensure the backend API is reachable and API base is configured.');
+      } else if (err?.message && err.message.includes('Network')) {
+        setOtpError('Network error while sending OTP. Check your connection or backend availability.');
+      } else {
+        setOtpError("Failed to send OTP. Try again.");
+      }
+      setTimeout(() => setOtpError(""), 4000);
     }
   };
 
@@ -188,8 +210,16 @@ const Login = ({ onClose, setUser }) => {
         handlePostLoginRedirect(response.data.redirectTo);
       }, 2000);
     } catch (err) {
-      setOtpError("❌ Invalid OTP. Please try again.");
-      setTimeout(() => setOtpError(""), 3000);
+      console.error('verifyOtpPhone error', err);
+      const status = err?.response?.status;
+      if (status === 404) {
+        setOtpError('Server endpoint not found (404). Ensure the backend API is reachable and API base is configured.');
+      } else if (err?.message && err.message.includes('Network')) {
+        setOtpError('Network error while verifying OTP. Check your connection or backend availability.');
+      } else {
+        setOtpError("❌ Invalid OTP. Please try again.");
+      }
+      setTimeout(() => setOtpError(""), 4000);
     }
   };
 
