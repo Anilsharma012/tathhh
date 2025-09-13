@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './Dashboard.css';
 import './Dashboard-purchases.css';
 import { fetchPublishedCourses, fetchMyCourses } from '../../utils/api';
