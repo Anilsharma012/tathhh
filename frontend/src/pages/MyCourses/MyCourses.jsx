@@ -10,14 +10,51 @@ const MyCourses = () => {
 
   useEffect(() => {
     const run = async () => {
+      setLoading(true);
       try {
-        const token = localStorage.getItem('authToken');
-        if (!token) { setError('Please login'); setLoading(false); return; }
-        const res = await fetch('/api/user/student/my-courses', { headers: { Authorization: `Bearer ${token}` } });
+        const res = await fetch('/api/user/student/my-courses', { credentials: 'include' });
+        if (res.status === 401 || res.status === 403) {
+          setLoading(false);
+          setError('Please login');
+          // show toast if react-toastify available
+          try { const { toast } = await import('react-toastify'); toast.toast ? toast.toast('Please login') : toast.toast; } catch(e){}
+          return;
+        }
+
         const data = await res.json();
-        if (res.ok && data?.courses) { setItems(data.courses); } else { setError(data.message || 'Failed to load'); }
-      } catch (e) { setError('Failed to load'); }
-      finally { setLoading(false); }
+        console.log('my-courses:', data);
+
+        // Normalize response
+        const raw = data?.enrolledCourses || data?.unlockedCourses || data || [];
+        const normalized = (Array.isArray(raw) ? raw : []).map(x => (x && x.courseId) ? x : ({ courseId: x, status: x?.status || 'unlocked' }));
+
+        // Only unlocked
+        let unlocked = normalized.filter(i => !i.status || i.status === 'unlocked');
+
+        // If justPurchasedCourseId present, move to top and mark highlight
+        try {
+          const justId = localStorage.getItem('justPurchasedCourseId');
+          if (justId) {
+            const idx = unlocked.findIndex(it => {
+              const cid = it.courseId && it.courseId._id ? it.courseId._id.toString() : (it.courseId && it.courseId.toString ? it.courseId.toString() : null);
+              return cid === justId.toString();
+            });
+            if (idx > -1) {
+              const [found] = unlocked.splice(idx, 1);
+              found._justPurchased = true;
+              unlocked.unshift(found);
+            }
+            localStorage.removeItem('justPurchasedCourseId');
+          }
+        } catch (e) {}
+
+        setItems(unlocked);
+      } catch (e) {
+        console.error('my-courses fetch error', e);
+        setError(e.message && e.message.includes('Network') ? 'Network error' : 'Failed to load');
+      } finally {
+        setLoading(false);
+      }
     };
     run();
   }, []);
