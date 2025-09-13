@@ -203,8 +203,16 @@ const Login = ({ onClose, setUser }) => {
         handlePostLoginRedirect(response.data.redirectTo);
       }, 2000);
     } catch (err) {
-      setOtpError("❌ Invalid OTP. Please try again.");
-      setTimeout(() => setOtpError(""), 3000);
+      console.error('verifyOtpPhone error', err);
+      const status = err?.response?.status;
+      if (status === 404) {
+        setOtpError('Server endpoint not found (404). Ensure the backend API is reachable and API base is configured.');
+      } else if (err?.message && err.message.includes('Network')) {
+        setOtpError('Network error while verifying OTP. Check your connection or backend availability.');
+      } else {
+        setOtpError("❌ Invalid OTP. Please try again.");
+      }
+      setTimeout(() => setOtpError(""), 4000);
     }
   };
 
